@@ -11,6 +11,8 @@ export async function getWishlist(userId: string): Promise<WishlistEntry[]> {
   return (data as WishlistEntry[]) ?? [];
 }
 
+const PG_UNIQUE_VIOLATION = "23505";
+
 export async function addToWishlist(
   userId: string,
   itemId: string
@@ -18,7 +20,7 @@ export async function addToWishlist(
   const { error } = await supabase
     .from("wishlist")
     .insert({ user_id: userId, item_id: itemId });
-  if (error && error.code !== "23505") throw error; // 23505 = unique_violation
+  if (error && error.code !== PG_UNIQUE_VIOLATION) throw error;
 }
 
 export async function removeFromWishlist(

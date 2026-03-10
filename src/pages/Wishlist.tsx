@@ -3,9 +3,13 @@ import { Heart } from "lucide-react";
 import { useWishlistQuery } from "@/hooks/useWishlistQuery";
 import ItemCard from "@/components/ItemCard";
 
+import type { Item } from "@/lib/types";
+
 const Wishlist = () => {
   const { data: wishlistEntries = [], isLoading } = useWishlistQuery();
-  const items = wishlistEntries.map((e) => e.item).filter(Boolean);
+  const items = wishlistEntries
+    .map((e) => e.item)
+    .filter((item): item is Item => item !== undefined && item !== null);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -21,7 +25,7 @@ const Wishlist = () => {
       ) : items.length > 0 ? (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((item, i) => (
-            <ItemCard key={item!.id} item={item!} index={i} />
+            <ItemCard key={item.id} item={item} index={i} />
           ))}
         </div>
       ) : (
