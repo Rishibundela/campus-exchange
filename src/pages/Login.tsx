@@ -1,18 +1,41 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ShoppingBag } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Login = () => {
   const [isSignup, setIsSignup] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [name, setName] = useState("");
+  const [course, setCourse] = useState("");
+  const [year, setYear] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const { signIn, signUp } = useAuth();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success(isSignup ? "Account created! Check your college email to verify." : "Welcome back! 🎉");
+    setLoading(true);
+    try {
+      if (isSignup) {
+        await signUp(email, password, name, course, year);
+        toast.success("Account created! Check your college email to verify.");
+      } else {
+        await signIn(email, password);
+        toast.success("Welcome back! 🎉");
+        navigate("/");
+      }
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -39,30 +62,34 @@ const Login = () => {
             <>
               <div>
                 <Label htmlFor="name" className="font-display text-sm font-semibold">Full Name</Label>
-                <Input id="name" placeholder="Arjun Mehta" className="mt-1.5 font-body text-sm" required />
+                <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Arjun Mehta" className="mt-1.5 font-body text-sm" required />
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <Label htmlFor="course" className="font-display text-sm font-semibold">Course</Label>
-                  <Input id="course" placeholder="B.Tech CSE" className="mt-1.5 font-body text-sm" required />
+                  <Input id="course" value={course} onChange={(e) => setCourse(e.target.value)} placeholder="B.Tech CSE" className="mt-1.5 font-body text-sm" required />
                 </div>
                 <div>
                   <Label htmlFor="year" className="font-display text-sm font-semibold">Year</Label>
-                  <Input id="year" placeholder="3rd Year" className="mt-1.5 font-body text-sm" required />
+                  <Input id="year" value={year} onChange={(e) => setYear(e.target.value)} placeholder="3rd Year" className="mt-1.5 font-body text-sm" required />
                 </div>
               </div>
             </>
           )}
           <div>
             <Label htmlFor="email" className="font-display text-sm font-semibold">College Email</Label>
-            <Input id="email" type="email" placeholder="you@college.edu" className="mt-1.5 font-body text-sm" required />
+            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@college.edu" className="mt-1.5 font-body text-sm" required />
           </div>
           <div>
             <Label htmlFor="password" className="font-display text-sm font-semibold">Password</Label>
-            <Input id="password" type="password" placeholder="••••••••" className="mt-1.5 font-body text-sm" required />
+            <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="mt-1.5 font-body text-sm" required />
           </div>
-          <Button type="submit" className="w-full bg-hero-gradient font-display text-sm font-semibold text-primary-foreground hover:opacity-90">
-            {isSignup ? "Create Account" : "Log In"}
+          <Button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-hero-gradient font-display text-sm font-semibold text-primary-foreground hover:opacity-90"
+          >
+            {loading ? "Please wait…" : isSignup ? "Create Account" : "Log In"}
           </Button>
         </form>
 

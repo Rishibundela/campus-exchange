@@ -1,73 +1,107 @@
-# Welcome to your Lovable project
+# YouthMart — Campus Exchange
 
-## Project info
+A modern college student marketplace to buy, sell, and exchange study materials within your campus community.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Tech Stack
 
-## How can I edit this code?
+- **Frontend:** React 18 + TypeScript + Vite
+- **Styling:** Tailwind CSS + shadcn/ui
+- **Routing:** React Router DOM v6
+- **State/Data:** TanStack React Query
+- **Backend:** Supabase (PostgreSQL + Auth + Storage)
+- **Animations:** Framer Motion
 
-There are several ways of editing your application.
+## Getting Started
 
-**Use Lovable**
+### 1. Prerequisites
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+- Node.js 18+ or Bun
+- A [Supabase](https://supabase.com) account (free tier works)
 
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+### 2. Clone & Install
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
 git clone <YOUR_GIT_URL>
+cd campus-exchange
+npm install
+```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### 3. Set Up Supabase
 
-# Step 3: Install the necessary dependencies.
-npm i
+1. Create a new project at [app.supabase.com](https://app.supabase.com)
+2. Go to **SQL Editor** and run the migration file:
+   - `supabase/migrations/20240101000000_initial_schema.sql`
+3. Go to **Settings → API** to find your project URL and anon key
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+### 4. Configure Environment Variables
+
+Copy the example file and fill in your credentials:
+
+```sh
+cp .env.example .env
+```
+
+Edit `.env`:
+
+```
+VITE_SUPABASE_URL=https://your-project-id.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key-here
+```
+
+### 5. Run the App
+
+```sh
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Open [http://localhost:8080](http://localhost:8080).
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Architecture
 
-**Use GitHub Codespaces**
+```
+Browser (React SPA)
+  │
+  ├── React Router DOM  →  Page components
+  ├── TanStack Query    →  Data fetching + caching
+  ├── AuthContext       →  Session management
+  │
+  └── Supabase SDK
+        ├── supabase.auth    →  Login / signup / logout
+        ├── supabase.from()  →  PostgreSQL CRUD
+        └── supabase.storage →  Image uploads
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Database Schema
 
-## What technologies are used for this project?
+| Table       | Purpose                                  |
+|-------------|------------------------------------------|
+| `profiles`  | User profiles (name, college, course)    |
+| `items`     | Item listings with seller reference      |
+| `wishlist`  | User ↔ item many-to-many saved items     |
+| `messages`  | Direct messages between buyer and seller |
+| `reviews`   | Seller reviews and ratings               |
 
-This project is built with:
+Row Level Security (RLS) is enabled on all tables:
+- Anyone can read public listings and profiles
+- Users can only create/modify their own data
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Features
 
-## How can I deploy this project?
+- 🔐 **Real Authentication** — Email + password via Supabase Auth
+- 📦 **Item Listings** — Create, browse, filter, and view items
+- ☁️ **Image Upload** — Photos stored in Supabase Storage
+- ❤️ **Persistent Wishlist** — Saved across sessions in the database
+- 💬 **Messaging** — Contact sellers directly
+- ⭐ **Reviews** — Rate and review sellers
+- 🛡️ **Protected Routes** — `/sell` and `/wishlist` require login
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+## Deployment
 
-## Can I connect a custom domain to my Lovable project?
+Deploy to any static host (Vercel, Netlify, Cloudflare Pages):
 
-Yes, you can!
+```sh
+npm run build
+# Upload the `dist/` folder
+```
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Make sure to set the same environment variables in your hosting provider's dashboard.
