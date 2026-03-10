@@ -1,31 +1,24 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Search, SlidersHorizontal } from "lucide-react";
+import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ItemCard from "@/components/ItemCard";
-import { categories, mockItems } from "@/lib/data";
+import { categories } from "@/lib/data";
+import { useItems } from "@/hooks/useItems";
+import type { ItemFilters } from "@/lib/items";
 
 const Browse = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const initialCategory = searchParams.get("category") || "";
   const initialQuery = searchParams.get("q") || "";
 
   const [query, setQuery] = useState(initialQuery);
   const [category, setCategory] = useState(initialCategory);
-  const [priceSort, setPriceSort] = useState("");
+  const [priceSort, setPriceSort] = useState<ItemFilters["priceSort"]>(undefined);
   const [condition, setCondition] = useState("");
 
-  const filtered = useMemo(() => {
-    let items = [...mockItems];
-    if (query) items = items.filter((i) => i.title.toLowerCase().includes(query.toLowerCase()) || i.description.toLowerCase().includes(query.toLowerCase()));
-    if (category) items = items.filter((i) => i.category === category);
-    if (condition) items = items.filter((i) => i.condition === condition);
-    if (priceSort === "low") items.sort((a, b) => a.price - b.price);
-    if (priceSort === "high") items.sort((a, b) => b.price - a.price);
-    return items;
-  }, [query, category, priceSort, condition]);
+  const { data: items = [], isLoading } = useItems({ query, category, condition, priceSort });
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -65,7 +58,10 @@ const Browse = () => {
             <SelectItem value="Fair">Fair</SelectItem>
           </SelectContent>
         </Select>
-        <Select value={priceSort} onValueChange={setPriceSort}>
+        <Select
+          value={priceSort ?? "none"}
+          onValueChange={(v) => setPriceSort(v === "none" ? undefined : (v as ItemFilters["priceSort"]))}
+        >
           <SelectTrigger className="w-full font-body text-sm sm:w-36">
             <SelectValue placeholder="Sort Price" />
           </SelectTrigger>
@@ -77,19 +73,28 @@ const Browse = () => {
         </Select>
       </div>
 
-      <p className="mb-4 font-body text-sm text-muted-foreground">{filtered.length} items found</p>
-
-      {filtered.length > 0 ? (
+      {isLoading ? (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((item, i) => (
-            <ItemCard key={item.id} item={item} index={i} />
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="h-64 animate-pulse rounded-xl bg-muted" />
           ))}
         </div>
       ) : (
-        <div className="py-20 text-center">
-          <p className="font-display text-xl font-semibold text-foreground">No items found</p>
-          <p className="mt-2 font-body text-sm text-muted-foreground">Try adjusting your filters</p>
-        </div>
+        <>
+          <p className="mb-4 font-body text-sm text-muted-foreground">{items.length} items found</p>
+          {items.length > 0 ? (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {items.map((item, i) => (
+                <ItemCard key={item.id} item={item} index={i} />
+              ))}
+            </div>
+          ) : (
+            <div className="py-20 text-center">
+              <p className="font-display text-xl font-semibold text-foreground">No items found</p>
+              <p className="mt-2 font-body text-sm text-muted-foreground">Try adjusting your filters</p>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

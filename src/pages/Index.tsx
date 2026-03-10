@@ -6,8 +6,12 @@ import HeroSearch from "@/components/HeroSearch";
 import CategoryCard from "@/components/CategoryCard";
 import ItemCard from "@/components/ItemCard";
 import { categories, mockItems } from "@/lib/data";
+import { useItems } from "@/hooks/useItems";
 
 const Index = () => {
+  const { data: items, isLoading, isError } = useItems();
+  const displayItems = items ?? mockItems;
+
   return (
     <div>
       {/* Hero */}
@@ -81,11 +85,25 @@ const Index = () => {
             Browse all →
           </Link>
         </div>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {mockItems.map((item, i) => (
-            <ItemCard key={item.id} item={item} index={i} />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="h-64 animate-pulse rounded-xl bg-muted" />
+            ))}
+          </div>
+        ) : isError ? (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {mockItems.map((item, i) => (
+              <ItemCard key={item.id} item={item} index={i} />
+            ))}
+          </div>
+        ) : (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {displayItems.slice(0, 6).map((item, i) => (
+              <ItemCard key={item.id} item={item} index={i} />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Value Props */}
