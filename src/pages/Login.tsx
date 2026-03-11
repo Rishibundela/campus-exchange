@@ -11,11 +11,15 @@ import { useAuth } from "@/contexts/AuthContext";
 const Login = () => {
   const [isSignup, setIsSignup] = useState(false);
   const [loading, setLoading] = useState(false);
+  
+  // Form states
   const [name, setName] = useState("");
+  const [college, setCollege] = useState("LNCT"); // Default to LNCT
   const [course, setCourse] = useState("");
   const [year, setYear] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
 
@@ -24,7 +28,8 @@ const Login = () => {
     setLoading(true);
     try {
       if (isSignup) {
-        await signUp(email, password, name, course, year);
+        // Now passing college as well!
+        await signUp(email, password, name, college, course, year);
         toast.success("Account created! Check your college email to verify.");
       } else {
         await signIn(email, password);
@@ -64,6 +69,22 @@ const Login = () => {
                 <Label htmlFor="name" className="font-display text-sm font-semibold">Full Name</Label>
                 <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Arjun Mehta" className="mt-1.5 font-body text-sm" required />
               </div>
+              
+              <div>
+                <Label htmlFor="college" className="font-display text-sm font-semibold">College</Label>
+                <select 
+                  id="college" 
+                  value={college} 
+                  onChange={(e) => setCollege(e.target.value)} 
+                  className="mt-1.5 flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 font-body"
+                  required
+                >
+                  <option value="LNCT">LNCT</option>
+                  <option value="LNCTS">LNCTS</option>
+                  <option value="LNCTE">LNCTE</option>
+                </select>
+              </div>
+
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <Label htmlFor="course" className="font-display text-sm font-semibold">Course</Label>
@@ -78,7 +99,7 @@ const Login = () => {
           )}
           <div>
             <Label htmlFor="email" className="font-display text-sm font-semibold">College Email</Label>
-            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@college.edu" className="mt-1.5 font-body text-sm" required />
+            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@lnct.ac.in" className="mt-1.5 font-body text-sm" required />
           </div>
           <div>
             <Label htmlFor="password" className="font-display text-sm font-semibold">Password</Label>
@@ -95,7 +116,7 @@ const Login = () => {
 
         <p className="mt-4 text-center font-body text-sm text-muted-foreground">
           {isSignup ? "Already have an account?" : "Don't have an account?"}{" "}
-          <button onClick={() => setIsSignup(!isSignup)} className="font-medium text-primary hover:underline">
+          <button type="button" onClick={() => setIsSignup(!isSignup)} className="font-medium text-primary hover:underline">
             {isSignup ? "Log in" : "Sign up"}
           </button>
         </p>

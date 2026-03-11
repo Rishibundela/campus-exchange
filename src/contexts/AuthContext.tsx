@@ -13,6 +13,7 @@ interface AuthContextType {
     email: string,
     password: string,
     name: string,
+    college: string, // Added college here
     course: string,
     year: string
   ) => Promise<void>;
@@ -28,17 +29,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  async function fetchProfile(userId: string) {
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", userId)
-      .maybeSingle();
-    if (error) console.error("fetchProfile error:", error.message);
-    setProfile(data as Profile | null);
-  }
-
   useEffect(() => {
+    // Moved inside useEffect to prevent dependency warnings
+    async function fetchProfile(userId: string) {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .maybeSingle();
+        
+      if (error) {
+        console.error("fetchProfile error:", error.message);
+      }
+      setProfile(data as Profile | null);
+    }
+
+    // 1. Initial fetch
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -46,11 +52,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     });
 
+    // 2. Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
+      
       if (session?.user) {
         fetchProfile(session.user.id);
       } else {
@@ -59,26 +67,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, []); // Clean dependency array now
 
   async function signUp(
     email: string,
     password: string,
     name: string,
+    college: string, // Added college here
     course: string,
     year: string
   ) {
-    const { data, error } = await supabase.auth.signUp({ email, password });
+    // Pass extra data in user_metadata, including college
+    const { error } = await supabase.auth.signUp({ 
+      email, 
+      password,
+      options: {
+        data: {
+          name,
+          college, // Passed to Supabase here
+          course,
+          year
+        }
+      }
+    });
+    
     if (error) throw error;
-    if (data.user) {
-      const { error: profileError } = await supabase.from("profiles").insert({
-        id: data.user.id,
-        name,
-        course,
-        year,
-      });
-      if (profileError) throw profileError;
-    }
   }
 
   async function signIn(email: string, password: string) {

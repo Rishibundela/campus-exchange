@@ -4,7 +4,10 @@ import { ShoppingBag } from "lucide-react";
 const Footer = () => (
   <footer className="border-t border-border bg-card">
     <div className="container mx-auto px-4 py-12">
-      <div className="grid gap-8 md:grid-cols-4">
+      {/* Updated grid classes to handle 5 columns nicely */}
+      <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+        
+        {/* Brand Section */}
         <div>
           <Link to="/" className="mb-4 flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-hero-gradient">
@@ -18,6 +21,8 @@ const Footer = () => (
             Helping students share resources, save money, and connect with peers on campus.
           </p>
         </div>
+
+        {/* Explore Links */}
         <div>
           <h4 className="mb-3 font-display text-sm font-semibold text-foreground">Explore</h4>
           <div className="flex flex-col gap-2">
@@ -27,6 +32,8 @@ const Footer = () => (
             <Link to="/browse?category=Electronics" className="font-body text-sm text-muted-foreground hover:text-primary">Electronics</Link>
           </div>
         </div>
+
+        {/* Company Links */}
         <div>
           <h4 className="mb-3 font-display text-sm font-semibold text-foreground">Company</h4>
           <div className="flex flex-col gap-2">
@@ -36,6 +43,8 @@ const Footer = () => (
             <Link to="/privacy" className="font-body text-sm text-muted-foreground hover:text-primary">Privacy Policy</Link>
           </div>
         </div>
+
+        {/* Connect Section */}
         <div>
           <h4 className="mb-3 font-display text-sm font-semibold text-foreground">Connect</h4>
           <p className="font-body text-sm text-muted-foreground">
@@ -45,7 +54,26 @@ const Footer = () => (
             Get in touch →
           </Link>
         </div>
+
+        {/* College Info Section */}
+        <div>
+          <h4 className="mb-3 font-display text-sm font-semibold text-foreground">
+            Lakshmi Narain College of Technology
+          </h4>
+          <p className="mb-2 font-body text-xs leading-relaxed text-muted-foreground">
+            LNCT Campus, Kalchuri Nagar, (P.O. Kolua) Raisen Road, Bhopal-462022 (M.P.)
+          </p>
+          <div className="space-y-1 font-body text-xs text-muted-foreground">
+            <p>📞 Reception: 0755-6185300</p>
+            <p>📞 Admissions: 7440777111, 0755-6185350</p>
+            <p>📞 T&P Cell: 9826062730, 0755-6185341</p>
+            <p>✉️ <a href="mailto:info@lnct.ac.in" className="text-primary hover:underline">info@lnct.ac.in</a></p>
+            <p>✉️ <a href="mailto:admission@lnct.ac.in" className="text-primary hover:underline">admission@lnct.ac.in</a></p>
+          </div>
+        </div>
+
       </div>
+
       <div className="mt-8 border-t border-border pt-6 text-center">
         <p className="font-body text-xs text-muted-foreground">
           © 2026 YouthMart. Built for students, by students. 🎓

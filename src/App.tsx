@@ -20,9 +20,19 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+import { Loader2 } from "lucide-react";
+
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
-  if (loading) return null;
+  
+  if (loading) {
+    return (
+      <div className="flex h-[50vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+  
   if (!user) return <Navigate to="/login" replace />;
   return <>{children}</>;
 }

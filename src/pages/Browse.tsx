@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -17,6 +17,11 @@ const Browse = () => {
   const [category, setCategory] = useState(initialCategory);
   const [priceSort, setPriceSort] = useState<ItemFilters["priceSort"]>(undefined);
   const [condition, setCondition] = useState("");
+
+  useEffect(() => {
+  setQuery(searchParams.get("q") || "");
+  setCategory(searchParams.get("category") || "");
+}, [searchParams]);
 
   const { data: items = [], isLoading, isError } = useItems({ query, category, condition, priceSort });
 
@@ -80,14 +85,44 @@ const Browse = () => {
           ))}
         </div>
       ) : isError ? (
-        <>
-          <p className="mb-4 font-body text-sm text-muted-foreground">{mockItems.length} items found (offline mode)</p>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {mockItems.map((item, i) => (
-              <ItemCard key={item.id} item={item} index={i} />
-            ))}
-          </div>
-        </>
+      (() => {
+        let filtered = mockItems.filter((item) => {
+          if (query && !item.title.toLowerCase().includes(query.toLowerCase()) && !item.description.toLowerCase().includes(query.toLowerCase())) {
+            return false;
+          }
+          if (category && category !== "all" && item.category !== category) {
+            return false;
+          }
+          if (condition && condition !== "all" && item.condition !== condition) {
+            return false;
+          }
+          return true;
+        });
+
+        if (priceSort === "low") {
+          filtered = [...filtered].sort((a, b) => a.price - b.price);
+        } else if (priceSort === "high") {
+          filtered = [...filtered].sort((a, b) => b.price - a.price);
+        }
+
+        return (
+          <>
+            <p className="mb-4 font-body text-sm text-muted-foreground">{filtered.length} items found (offline mode)</p>
+            {filtered.length > 0 ? (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {filtered.map((item, i) => (
+                  <ItemCard key={item.id} item={item} index={i} />
+                ))}
+              </div>
+            ) : (
+              <div className="py-20 text-center">
+                <p className="font-display text-xl font-semibold text-foreground">No items found</p>
+                <p className="mt-2 font-body text-sm text-muted-foreground">Try adjusting your filters</p>
+              </div>
+            )}
+          </>
+        );
+      })()
       ) : (
         <>
           <p className="mb-4 font-body text-sm text-muted-foreground">{items.length} items found</p>

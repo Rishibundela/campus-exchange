@@ -37,7 +37,7 @@ const Navbar = () => {
             <ShoppingBag className="h-5 w-5 text-primary-foreground" />
           </div>
           <span className="font-display text-xl font-bold text-foreground">
-            Youth<span className="text-gradient">Mart</span>
+            Youth<span className="text-gradient">Mart</span> <span className="hidden text-xs font-normal text-muted-foreground sm:inline">| LNCT Bhopal</span>
           </span>
         </Link>
 

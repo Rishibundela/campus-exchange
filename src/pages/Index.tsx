@@ -26,15 +26,16 @@ const Index = () => {
             <span className="mb-4 inline-block rounded-full bg-primary-foreground/20 px-4 py-1.5 font-body text-sm font-medium text-primary-foreground backdrop-blur-sm">
               🎓 Your Campus Marketplace
             </span>
-            <h1 className="mb-4 font-display text-4xl font-extrabold leading-tight text-primary-foreground md:text-6xl">
-              Buy, Sell & Exchange
-              <br />
-              Campus Essentials
+            
+            <h1 className="mb-4 font-display text-4xl font-extrabold text-white md:text-5xl">
+              Your <span className="text-yellow-400 drop-shadow-md">LNCT</span> Campus Marketplace
             </h1>
-            <p className="mx-auto mb-8 max-w-lg font-body text-lg text-primary-foreground/80">
-              Save money, reduce waste, and connect with fellow students. Find textbooks, notes, gadgets and more.
+            <p className="mx-auto mb-8 max-w-xl font-body text-sm leading-relaxed text-white/90">
+              Buy, sell and exchange study materials with fellow LNCT students.
+              Save money, reduce waste, and connect with peers on campus.
             </p>
           </motion.div>
+          
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -43,15 +44,17 @@ const Index = () => {
           >
             <HeroSearch />
           </motion.div>
+          
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
             className="mt-6 flex items-center justify-center gap-6 font-body text-sm text-primary-foreground/70"
           >
+            {/* Updated Stats for LNCT */}
             <span>📚 500+ Items</span>
-            <span>👥 1,200+ Students</span>
-            <span>🏫 15+ Campuses</span>
+            <span>👥 1,200+ LNCTians</span>
+            <span>🏫 Exclusive to LNCT</span>
           </motion.div>
         </div>
       </section>
@@ -138,7 +141,7 @@ const Index = () => {
       {/* CTA */}
       <section className="container mx-auto px-4 py-16 text-center">
         <h2 className="mb-3 font-display text-2xl font-bold text-foreground">Ready to start?</h2>
-        <p className="mb-6 font-body text-muted-foreground">Join thousands of students already saving on campus.</p>
+        <p className="mb-6 font-body text-muted-foreground">Join fellow LNCT students already saving on campus.</p>
         <div className="flex justify-center gap-3">
           <Link to="/browse">
             <Button variant="outline" className="gap-2 font-display text-sm font-semibold">
