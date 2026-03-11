@@ -1,73 +1,101 @@
-# Welcome to your Lovable project
+# YouthMart — Campus Marketplace for Students
 
-## Project info
+A modern web application designed for college students to buy, sell, and exchange study materials within their campus community.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Features
 
-## How can I edit this code?
+- **Browse & Search** — Find books, electronics, stationery, notes, lab equipment and more
+- **Category Filtering** — Filter by category, condition, and price
+- **Item Listings** — Sellers can list items with photos, price, category, and description
+- **Wishlist** — Save items for later
+- **Contact Sellers** — Message sellers directly about listings
+- **Seller Ratings** — View ratings and reviews for sellers
+- **Authentication** — Sign up and log in with college email
+- **Responsive Design** — Works on mobile and desktop
 
-There are several ways of editing your application.
+## Tech Stack
 
-**Use Lovable**
+- **Frontend:** React 18 + TypeScript
+- **Build Tool:** Vite
+- **Styling:** Tailwind CSS
+- **UI Components:** shadcn/ui (Radix UI)
+- **Routing:** React Router DOM v6
+- **Data Fetching:** TanStack React Query
+- **Animations:** Framer Motion
+- **Forms:** React Hook Form + Zod
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## Getting Started
 
-Changes made via Lovable will be committed automatically to this repo.
+### Prerequisites
 
-**Use your preferred IDE**
+- Node.js 18+ installed ([install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating))
+- npm or bun package manager
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+### Installation
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# Clone the repository
+git clone https://github.com/Rishibundela/campus-exchange.git
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Navigate to the project directory
+cd campus-exchange
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Install dependencies
+npm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start the development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The app will be available at `http://localhost:8080`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Project Structure
 
-**Use GitHub Codespaces**
+```
+src/
+├── components/     # Reusable UI components
+│   ├── ui/         # shadcn/ui base components
+│   ├── Navbar.tsx
+│   ├── Footer.tsx
+│   ├── ItemCard.tsx
+│   └── ...
+├── pages/          # Route page components
+│   ├── Index.tsx   # Home page
+│   ├── Browse.tsx  # Browse listings
+│   ├── Sell.tsx    # List an item
+│   ├── Login.tsx   # Authentication
+│   └── ...
+├── hooks/          # Custom React hooks
+├── lib/            # Utilities, data, and helpers
+├── App.tsx         # Main app with routing
+└── main.tsx        # Entry point
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Pages
 
-## What technologies are used for this project?
+| Route | Page | Description |
+|-------|------|-------------|
+| `/` | Home | Featured items and categories |
+| `/browse` | Browse | Search, filter, and sort listings |
+| `/item/:id` | Item Detail | View item details and contact seller |
+| `/sell` | Sell | List a new item for sale |
+| `/wishlist` | Wishlist | View saved items |
+| `/login` | Login/Signup | Authentication |
+| `/about` | About | About YouthMart |
+| `/contact` | Contact | Contact form |
+| `/terms` | Terms | Terms and conditions |
+| `/privacy` | Privacy | Privacy policy |
 
-This project is built with:
+## Scripts
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Build for production |
+| `npm run preview` | Preview production build |
+| `npm run lint` | Run ESLint |
+| `npm run test` | Run tests |
 
-## How can I deploy this project?
+## License
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+This project is open source and available under the [MIT License](LICENSE).
