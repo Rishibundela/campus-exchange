@@ -7,29 +7,25 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMyItems } from "@/hooks/useMyItems";
+import { useMyMessages, useMarkAsRead, useSendMessage } from "@/hooks/useMessages";
 import ItemCard from "@/components/ItemCard";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
-// Placeholder hook - you will want to update this to fetch from your 'messages' table!
-const useMyMessages = () => {
-  return {
-    data: [
-      { id: 1, sender: "Sneha Gupta", item_title: "Casio FX-991EX", content: "Hi! Is this still available? Can we meet at the library?", date: "Today, 10:30 AM", read: false },
-      { id: 2, sender: "Rahul Verma", item_title: "Engineering Mathematics", content: "I'll take it for ₹300 if that works for you.", date: "Yesterday", read: true }
-    ],
-    isLoading: false
-  };
-};
-
 const Profile = () => {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
   const { data: myItems = [], isLoading } = useMyItems();
+  
+  // Real Message Hooks
   const { data: messages = [], isLoading: loadingMessages } = useMyMessages();
+  const markAsRead = useMarkAsRead();
+  const sendMsg = useSendMessage();
 
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(profile?.name || "");
@@ -38,6 +34,11 @@ const Profile = () => {
   const [year, setYear] = useState(profile?.year || "");
   const [contactInfo, setContactInfo] = useState(profile?.contact_info || "");
   const [saving, setSaving] = useState(false);
+
+  // Reply Modal State
+  const [replyOpen, setReplyOpen] = useState(false);
+  const [replyContent, setReplyContent] = useState("");
+  const [selectedMessage, setSelectedMessage] = useState<any>(null);
 
   const activeItems = myItems.filter((item) => item.status === "available");
   const soldItems = myItems.filter((item) => item.status === "sold");
@@ -68,6 +69,39 @@ const Profile = () => {
     navigate("/");
   };
 
+// 1. When the user clicks "Reply" on a message card
+const openReply = (msg: any) => {
+  setSelectedMessage(msg); // Store the message you are replying to
+  setReplyContent("");     // Clear the text area
+  setReplyOpen(true);      // Open the modal
+  
+  // If it's unread, mark it as read immediately
+  if (!msg.read) {
+    markAsRead.mutate(msg.id);
+  }
+};
+
+// 2. When the user hits "Send Reply" in the Dialog
+const handleSendReply = async () => {
+  if (!replyContent.trim() || !selectedMessage) return;
+  
+  try {
+    await sendMsg.mutateAsync({ 
+      // CRITICAL: Send to the sender of the message you received
+      receiverId: selectedMessage.sender_id, 
+      itemId: selectedMessage.item_id, 
+      content: replyContent 
+    });
+    
+    toast.success("Reply sent! 🚀");
+    setReplyOpen(false);
+    setReplyContent("");
+  } catch (error) {
+    toast.error("Could not send reply. Try again.");
+    console.error(error);
+  }
+};
+
   if (!user) {
     return (
       <div className="container mx-auto px-4 py-20 text-center">
@@ -84,7 +118,7 @@ const Profile = () => {
     <div className="container mx-auto max-w-4xl px-4 py-8">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
 
-        {/* Profile Header */}
+        {/* Profile Header (Unchanged) */}
         <div className="mb-8 rounded-xl border border-border bg-card p-6 shadow-card">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex items-start gap-4">
@@ -118,20 +152,10 @@ const Profile = () => {
               </div>
             </div>
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-1.5 font-display text-xs font-semibold"
-                onClick={() => setEditing(!editing)}
-              >
+              <Button variant="outline" size="sm" className="gap-1.5 font-display text-xs font-semibold" onClick={() => setEditing(!editing)}>
                 <Edit2 className="h-3.5 w-3.5" /> Edit Profile
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-1.5 font-display text-xs font-semibold text-destructive hover:text-destructive"
-                onClick={handleLogout}
-              >
+              <Button variant="outline" size="sm" className="gap-1.5 font-display text-xs font-semibold text-destructive hover:text-destructive" onClick={handleLogout}>
                 <LogOut className="h-3.5 w-3.5" /> Logout
               </Button>
             </div>
@@ -139,11 +163,7 @@ const Profile = () => {
 
           {/* Edit Form */}
           {editing && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              className="mt-6 border-t border-border pt-6"
-            >
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="mt-6 border-t border-border pt-6">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <Label className="font-display text-sm font-semibold">Name</Label>
@@ -151,11 +171,7 @@ const Profile = () => {
                 </div>
                 <div>
                   <Label className="font-display text-sm font-semibold">College</Label>
-                  <select
-                    value={college}
-                    onChange={(e) => setCollege(e.target.value)}
-                    className="mt-1.5 flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 font-body"
-                  >
+                  <select value={college} onChange={(e) => setCollege(e.target.value)} className="mt-1.5 flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 font-body">
                     <option value="LNCT">LNCT</option>
                     <option value="LNCTS">LNCTS</option>
                     <option value="LNCTE">LNCTE</option>
@@ -230,49 +246,38 @@ const Profile = () => {
           </TabsList>
 
           <TabsContent value="active">
-            {isLoading ? (
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="h-64 animate-pulse rounded-xl bg-muted" />
-                ))}
-              </div>
-            ) : activeItems.length > 0 ? (
+             {/* ... (Keep your existing Active Items map here) ... */}
+             {activeItems.length > 0 ? (
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {activeItems.map((item, i) => (
                   <ItemCard key={item.id} item={item} index={i} />
                 ))}
               </div>
-            ) : (
+             ) : (
               <div className="py-16 text-center">
                 <Package className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
                 <p className="font-display text-xl font-semibold text-foreground">No active listings</p>
-                <p className="mt-2 font-body text-sm text-muted-foreground">Start selling by listing your first item!</p>
-                <Link to="/sell">
-                  <Button className="mt-4 bg-hero-gradient font-display text-sm font-semibold text-primary-foreground hover:opacity-90">
-                    List an Item
-                  </Button>
-                </Link>
               </div>
-            )}
+             )}
           </TabsContent>
 
           <TabsContent value="sold">
-            {soldItems.length > 0 ? (
+             {/* ... (Keep your existing Sold Items map here) ... */}
+             {soldItems.length > 0 ? (
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {soldItems.map((item, i) => (
                   <ItemCard key={item.id} item={item} index={i} />
                 ))}
               </div>
-            ) : (
+             ) : (
               <div className="py-16 text-center">
                 <CheckCircle className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
-                <p className="font-display text-xl font-semibold text-foreground">No sold items yet</p>
-                <p className="mt-2 font-body text-sm text-muted-foreground">Items you mark as sold will appear here.</p>
+                <p className="font-display text-xl font-semibold text-foreground">No sold items</p>
               </div>
-            )}
+             )}
           </TabsContent>
 
-          {/* NEW MESSAGES TAB */}
+          {/* REAL MESSAGES TAB */}
           <TabsContent value="messages">
             {loadingMessages ? (
               <div className="space-y-4">
@@ -282,30 +287,32 @@ const Profile = () => {
               </div>
             ) : messages.length > 0 ? (
               <div className="space-y-4">
-                {messages.map((msg) => (
+                {messages.map((msg: any) => (
                   <div key={msg.id} className={`rounded-xl border border-border p-4 shadow-sm transition-colors ${!msg.read ? 'bg-primary/5 border-primary/20' : 'bg-card'}`}>
                     <div className="flex items-start justify-between mb-2">
                       <div>
                         <p className="font-display text-sm font-bold text-foreground flex items-center gap-2">
                           <Mail className="h-4 w-4 text-muted-foreground" />
-                          {msg.sender}
+                          {msg.profiles?.name || "Anonymous User"}
                           {!msg.read && <span className="h-2 w-2 rounded-full bg-primary inline-block"></span>}
                         </p>
                         <p className="font-body text-xs font-medium text-primary mt-0.5">
-                          Interested in: {msg.item_title}
+                          Interested in: {msg.items?.title || "an item"}
                         </p>
                       </div>
-                      <span className="font-body text-xs text-muted-foreground">{msg.date}</span>
+                      <span className="font-body text-xs text-muted-foreground">
+                        {new Date(msg.created_at).toLocaleDateString()}
+                      </span>
                     </div>
                     <p className="font-body text-sm text-muted-foreground leading-relaxed bg-muted/30 p-3 rounded-lg mt-3">
                       "{msg.content}"
                     </p>
                     <div className="mt-4 flex gap-2">
-                      <Button variant="outline" size="sm" className="h-8 text-xs font-semibold">
+                      <Button variant="outline" size="sm" className="h-8 text-xs font-semibold" onClick={() => openReply(msg)}>
                         Reply
                       </Button>
                       {!msg.read && (
-                        <Button variant="ghost" size="sm" className="h-8 text-xs text-muted-foreground">
+                        <Button variant="ghost" size="sm" className="h-8 text-xs text-muted-foreground" onClick={() => markAsRead.mutate(msg.id)}>
                           Mark as read
                         </Button>
                       )}
@@ -321,10 +328,40 @@ const Profile = () => {
               </div>
             )}
           </TabsContent>
-
         </Tabs>
 
       </motion.div>
+
+      {/* REPLY DIALOG */}
+      <Dialog open={replyOpen} onOpenChange={setReplyOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="font-display">
+              Reply to {selectedMessage?.profiles?.name || "User"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <Label className="font-display text-sm font-semibold">Your message</Label>
+            <Textarea
+              value={replyContent}
+              onChange={(e) => setReplyContent(e.target.value)}
+              placeholder="Type your reply here..."
+              className="min-h-[100px] font-body text-sm"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setReplyOpen(false)}>Cancel</Button>
+            <Button
+              className="bg-hero-gradient font-display text-sm font-semibold text-primary-foreground hover:opacity-90"
+              onClick={handleSendReply}
+              disabled={sendMsg.isPending || !replyContent.trim()}
+            >
+              {sendMsg.isPending ? "Sending…" : "Send Reply"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 };
