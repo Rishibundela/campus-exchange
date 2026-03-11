@@ -4,7 +4,7 @@ import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ItemCard from "@/components/ItemCard";
-import { categories } from "@/lib/data";
+import { categories, mockItems } from "@/lib/data";
 import { useItems } from "@/hooks/useItems";
 import type { ItemFilters } from "@/lib/items";
 
@@ -18,7 +18,7 @@ const Browse = () => {
   const [priceSort, setPriceSort] = useState<ItemFilters["priceSort"]>(undefined);
   const [condition, setCondition] = useState("");
 
-  const { data: items = [], isLoading } = useItems({ query, category, condition, priceSort });
+  const { data: items = [], isLoading, isError } = useItems({ query, category, condition, priceSort });
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -79,6 +79,15 @@ const Browse = () => {
             <div key={i} className="h-64 animate-pulse rounded-xl bg-muted" />
           ))}
         </div>
+      ) : isError ? (
+        <>
+          <p className="mb-4 font-body text-sm text-muted-foreground">{mockItems.length} items found (offline mode)</p>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {mockItems.map((item, i) => (
+              <ItemCard key={item.id} item={item} index={i} />
+            ))}
+          </div>
+        </>
       ) : (
         <>
           <p className="mb-4 font-body text-sm text-muted-foreground">{items.length} items found</p>
