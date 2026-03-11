@@ -1,19 +1,28 @@
 import { Link } from "react-router-dom";
 import { Heart } from "lucide-react";
-import { useWishlist } from "@/hooks/useWishlist";
+import { useWishlistQuery } from "@/hooks/useWishlistQuery";
 import ItemCard from "@/components/ItemCard";
-import { mockItems } from "@/lib/data";
+
+import type { Item } from "@/lib/types";
 
 const Wishlist = () => {
-  const { wishlistIds } = useWishlist();
-  const items = mockItems.filter((i) => wishlistIds.includes(i.id));
+  const { data: wishlistEntries = [], isLoading } = useWishlistQuery();
+  const items = wishlistEntries
+    .map((e) => e.item)
+    .filter((item): item is Item => item !== undefined && item !== null);
 
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="mb-2 font-display text-3xl font-bold text-foreground">Your Wishlist</h1>
       <p className="mb-8 font-body text-sm text-muted-foreground">Items you've saved for later</p>
 
-      {items.length > 0 ? (
+      {isLoading ? (
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="h-64 animate-pulse rounded-xl bg-muted" />
+          ))}
+        </div>
+      ) : items.length > 0 ? (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((item, i) => (
             <ItemCard key={item.id} item={item} index={i} />
