@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 
 // Simple local wishlist (no persistence for now)
-let globalWishlist: Set<string> = new Set();
+const globalWishlist: Set<string> = new Set();
 const listeners: Set<() => void> = new Set();
 
 function notify() {
