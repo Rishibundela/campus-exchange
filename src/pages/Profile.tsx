@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { User, Package, CheckCircle, Edit2, LogOut, Mail, GraduationCap, Building2, Calendar } from "lucide-react";
+import { User, Package, CheckCircle, Edit2, LogOut, Mail, GraduationCap, Building2, Calendar, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,10 +14,22 @@ import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
+// Placeholder hook - you will want to update this to fetch from your 'messages' table!
+const useMyMessages = () => {
+  return {
+    data: [
+      { id: 1, sender: "Sneha Gupta", item_title: "Casio FX-991EX", content: "Hi! Is this still available? Can we meet at the library?", date: "Today, 10:30 AM", read: false },
+      { id: 2, sender: "Rahul Verma", item_title: "Engineering Mathematics", content: "I'll take it for ₹300 if that works for you.", date: "Yesterday", read: true }
+    ],
+    isLoading: false
+  };
+};
+
 const Profile = () => {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
   const { data: myItems = [], isLoading } = useMyItems();
+  const { data: messages = [], isLoading: loadingMessages } = useMyMessages();
 
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(profile?.name || "");
@@ -29,6 +41,7 @@ const Profile = () => {
 
   const activeItems = myItems.filter((item) => item.status === "available");
   const soldItems = myItems.filter((item) => item.status === "sold");
+  const unreadCount = messages.filter(m => !m.read).length;
 
   const handleSave = async () => {
     if (!user) return;
@@ -41,7 +54,6 @@ const Profile = () => {
       if (error) throw error;
       toast.success("Profile updated! ✅");
       setEditing(false);
-      // Reload to update the context
       window.location.reload();
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : "Failed to update profile");
@@ -186,21 +198,34 @@ const Profile = () => {
             <p className="font-display text-2xl font-bold text-foreground">{activeItems.length}</p>
             <p className="font-body text-xs text-muted-foreground">Active Listings</p>
           </div>
-          <div className="rounded-xl border border-border bg-card p-4 shadow-card text-center">
-            <CheckCircle className="mx-auto mb-2 h-6 w-6 text-warning" />
-            <p className="font-display text-2xl font-bold text-foreground">{soldItems.length}</p>
-            <p className="font-body text-xs text-muted-foreground">Sold Items</p>
+          <div className="rounded-xl border border-border bg-card p-4 shadow-card text-center relative">
+            {unreadCount > 0 && (
+              <span className="absolute top-3 right-3 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-white">
+                {unreadCount}
+              </span>
+            )}
+            <MessageCircle className="mx-auto mb-2 h-6 w-6 text-warning" />
+            <p className="font-display text-2xl font-bold text-foreground">{messages.length}</p>
+            <p className="font-body text-xs text-muted-foreground">Total Messages</p>
           </div>
         </div>
 
-        {/* Tabs: Active / Sold */}
+        {/* Tabs: Active / Sold / Messages */}
         <Tabs defaultValue="active">
-          <TabsList className="mb-6">
+          <TabsList className="mb-6 w-full justify-start overflow-x-auto">
             <TabsTrigger value="active" className="font-display text-sm font-semibold">
               Active ({activeItems.length})
             </TabsTrigger>
             <TabsTrigger value="sold" className="font-display text-sm font-semibold">
               Sold ({soldItems.length})
+            </TabsTrigger>
+            <TabsTrigger value="messages" className="font-display text-sm font-semibold flex items-center gap-2">
+              Messages
+              {unreadCount > 0 && (
+                <span className="flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[9px] font-bold text-white">
+                  {unreadCount}
+                </span>
+              )}
             </TabsTrigger>
           </TabsList>
 
@@ -246,6 +271,57 @@ const Profile = () => {
               </div>
             )}
           </TabsContent>
+
+          {/* NEW MESSAGES TAB */}
+          <TabsContent value="messages">
+            {loadingMessages ? (
+              <div className="space-y-4">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="h-24 animate-pulse rounded-xl bg-muted" />
+                ))}
+              </div>
+            ) : messages.length > 0 ? (
+              <div className="space-y-4">
+                {messages.map((msg) => (
+                  <div key={msg.id} className={`rounded-xl border border-border p-4 shadow-sm transition-colors ${!msg.read ? 'bg-primary/5 border-primary/20' : 'bg-card'}`}>
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <p className="font-display text-sm font-bold text-foreground flex items-center gap-2">
+                          <Mail className="h-4 w-4 text-muted-foreground" />
+                          {msg.sender}
+                          {!msg.read && <span className="h-2 w-2 rounded-full bg-primary inline-block"></span>}
+                        </p>
+                        <p className="font-body text-xs font-medium text-primary mt-0.5">
+                          Interested in: {msg.item_title}
+                        </p>
+                      </div>
+                      <span className="font-body text-xs text-muted-foreground">{msg.date}</span>
+                    </div>
+                    <p className="font-body text-sm text-muted-foreground leading-relaxed bg-muted/30 p-3 rounded-lg mt-3">
+                      "{msg.content}"
+                    </p>
+                    <div className="mt-4 flex gap-2">
+                      <Button variant="outline" size="sm" className="h-8 text-xs font-semibold">
+                        Reply
+                      </Button>
+                      {!msg.read && (
+                        <Button variant="ghost" size="sm" className="h-8 text-xs text-muted-foreground">
+                          Mark as read
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-16 text-center">
+                <MessageCircle className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+                <p className="font-display text-xl font-semibold text-foreground">No messages yet</p>
+                <p className="mt-2 font-body text-sm text-muted-foreground">When buyers contact you about your items, their messages will appear here.</p>
+              </div>
+            )}
+          </TabsContent>
+
         </Tabs>
 
       </motion.div>
