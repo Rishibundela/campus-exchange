@@ -54,7 +54,7 @@ VITE_SUPABASE_ANON_KEY=your-anon-key-here
 npm run dev
 ```
 
-Open [http://localhost:8080](http://localhost:8080).
+Open [YouthMart(https://youthmart.netlify.app/).
 
 ## Architecture
 
