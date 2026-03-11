@@ -1,12 +1,16 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Heart, Menu, Plus, Search, ShoppingBag, User, X } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Heart, LogOut, Menu, Plus, Search, ShoppingBag, User, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
 
   const links = [
     { to: "/", label: "Home" },
@@ -14,6 +18,16 @@ const Navbar = () => {
     { to: "/sell", label: "Sell" },
     { to: "/about", label: "About" },
   ];
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast.success("Signed out successfully");
+      navigate("/");
+    } catch {
+      toast.error("Failed to sign out");
+    }
+  };
 
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-lg">
@@ -61,11 +75,23 @@ const Navbar = () => {
               List Item
             </Button>
           </Link>
-          <Link to="/login">
-            <Button variant="outline" size="icon" className="border-border text-muted-foreground hover:text-foreground">
-              <User className="h-5 w-5" />
+          {user ? (
+            <Button
+              variant="outline"
+              size="icon"
+              title="Sign out"
+              className="border-border text-muted-foreground hover:text-foreground"
+              onClick={handleSignOut}
+            >
+              <LogOut className="h-5 w-5" />
             </Button>
-          </Link>
+          ) : (
+            <Link to="/login">
+              <Button variant="outline" size="icon" className="border-border text-muted-foreground hover:text-foreground">
+                <User className="h-5 w-5" />
+              </Button>
+            </Link>
+          )}
         </div>
 
         {/* Mobile toggle */}
@@ -104,11 +130,17 @@ const Navbar = () => {
                     <Heart className="h-4 w-4" /> Wishlist
                   </Button>
                 </Link>
-                <Link to="/login" className="flex-1" onClick={() => setMobileOpen(false)}>
-                  <Button variant="outline" className="w-full gap-2">
-                    <User className="h-4 w-4" /> Login
+                {user ? (
+                  <Button variant="outline" className="flex-1 gap-2" onClick={() => { setMobileOpen(false); handleSignOut(); }}>
+                    <LogOut className="h-4 w-4" /> Sign Out
                   </Button>
-                </Link>
+                ) : (
+                  <Link to="/login" className="flex-1" onClick={() => setMobileOpen(false)}>
+                    <Button variant="outline" className="w-full gap-2">
+                      <User className="h-4 w-4" /> Login
+                    </Button>
+                  </Link>
+                )}
               </div>
               <Link to="/sell" className="mt-1" onClick={() => setMobileOpen(false)}>
                 <Button className="w-full gap-2 bg-hero-gradient font-display text-sm font-semibold text-primary-foreground">
