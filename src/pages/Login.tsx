@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { ShoppingBag } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const Login = () => {
   const [isSignup, setIsSignup] = useState(false);
@@ -27,15 +28,15 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      if (isSignup) {
-        // Now passing college as well!
-        await signUp(email, password, name, college, course, year);
-        toast.success("Account created! Check your college email to verify.");
-      } else {
-        await signIn(email, password);
-        toast.success("Welcome back! 🎉");
-        navigate("/");
-      }
+    if (isSignup) {
+      await signUp(email, password, name, college, course, year);
+      toast.success("Account created! Check your email to verify.");
+      // ❌ No navigate() here — user stays on login page
+    } else {
+      await signIn(email, password);
+      toast.success("Welcome back! 🎉");
+      navigate("/"); // ✅ Only login redirects
+    }
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -58,7 +59,7 @@ const Login = () => {
             {isSignup ? "Create Account" : "Welcome Back"}
           </h1>
           <p className="mt-1 font-body text-sm text-muted-foreground">
-            {isSignup ? "Sign up with your college email" : "Log in to your YouthMart account"}
+            {isSignup ? "Sign up to start buying & selling" : "Log in to your YouthMart account"}
           </p>
         </div>
 
@@ -72,17 +73,16 @@ const Login = () => {
               
               <div>
                 <Label htmlFor="college" className="font-display text-sm font-semibold">College</Label>
-                <select 
-                  id="college" 
-                  value={college} 
-                  onChange={(e) => setCollege(e.target.value)} 
-                  className="mt-1.5 flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 font-body"
-                  required
-                >
-                  <option value="LNCT">LNCT</option>
-                  <option value="LNCTS">LNCTS</option>
-                  <option value="LNCTE">LNCTE</option>
-                </select>
+                <Select value={college} onValueChange={setCollege} required>
+                  <SelectTrigger className="mt-1.5 font-body text-sm">
+                    <SelectValue placeholder="Select college" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="LNCT">LNCT</SelectItem>
+                    <SelectItem value="LNCTS">LNCTS</SelectItem>
+                    <SelectItem value="LNCTE">LNCTE</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
@@ -98,8 +98,8 @@ const Login = () => {
             </>
           )}
           <div>
-            <Label htmlFor="email" className="font-display text-sm font-semibold">College Email</Label>
-            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@lnct.ac.in" className="mt-1.5 font-body text-sm" required />
+            <Label htmlFor="email" className="font-display text-sm font-semibold">Email</Label>
+            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@gmail.com" className="mt-1.5 font-body text-sm" required />
           </div>
           <div>
             <Label htmlFor="password" className="font-display text-sm font-semibold">Password</Label>

@@ -19,8 +19,8 @@ const Browse = () => {
   const [condition, setCondition] = useState("");
 
   useEffect(() => {
-  setQuery(searchParams.get("q") || "");
-  setCategory(searchParams.get("category") || "");
+    setQuery(searchParams.get("q") || "");
+    setCategory(searchParams.get("category") || "");
 }, [searchParams]);
 
   const { data: items = [], isLoading, isError } = useItems({ query, category, condition, priceSort });

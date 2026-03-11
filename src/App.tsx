@@ -11,6 +11,7 @@ import Browse from "./pages/Browse";
 import ItemDetail from "./pages/ItemDetail";
 import Sell from "./pages/Sell";
 import Wishlist from "./pages/Wishlist";
+import Profile from "./pages/Profile";        // ← ADD THIS
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Terms from "./pages/Terms";
@@ -18,9 +19,9 @@ import Privacy from "./pages/Privacy";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
-
 import { Loader2 } from "lucide-react";
+
+const queryClient = new QueryClient();
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -64,6 +65,15 @@ const App = () => (
                   element={
                     <ProtectedRoute>
                       <Wishlist />
+                    </ProtectedRoute>
+                  }
+                />
+                {/* ← ADD THIS ROUTE */}
+                <Route
+                  path="/profile"
+                  element={
+                    <ProtectedRoute>
+                      <Profile />
                     </ProtectedRoute>
                   }
                 />

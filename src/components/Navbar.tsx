@@ -41,7 +41,7 @@ const Navbar = () => {
           </span>
         </Link>
 
-        {/* Desktop */}
+        {/* Desktop Links */}
         <div className="hidden items-center gap-1 md:flex">
           {links.map((link) => (
             <Link
@@ -58,6 +58,7 @@ const Navbar = () => {
           ))}
         </div>
 
+        {/* Desktop Action Buttons */}
         <div className="hidden items-center gap-2 md:flex">
           <Link to="/browse">
             <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
@@ -75,16 +76,26 @@ const Navbar = () => {
               List Item
             </Button>
           </Link>
+          
+          {/* Desktop Auth Logic */}
           {user ? (
-            <Button
-              variant="outline"
-              size="icon"
-              title="Sign out"
-              className="border-border text-muted-foreground hover:text-foreground"
-              onClick={handleSignOut}
-            >
-              <LogOut className="h-5 w-5" />
-            </Button>
+            <>
+              {/* Added Desktop Profile Button here */}
+              <Link to="/profile">
+                <Button variant="ghost" size="icon" title="My Profile" className="text-muted-foreground hover:text-foreground">
+                  <User className="h-5 w-5" />
+                </Button>
+              </Link>
+              <Button
+                variant="outline"
+                size="icon"
+                title="Sign out"
+                className="border-border text-muted-foreground hover:text-foreground"
+                onClick={handleSignOut}
+              >
+                <LogOut className="h-5 w-5" />
+              </Button>
+            </>
           ) : (
             <Link to="/login">
               <Button variant="outline" size="icon" className="border-border text-muted-foreground hover:text-foreground">
@@ -124,24 +135,39 @@ const Navbar = () => {
                   {link.label}
                 </Link>
               ))}
-              <div className="mt-2 flex gap-2">
-                <Link to="/wishlist" className="flex-1" onClick={() => setMobileOpen(false)}>
-                  <Button variant="outline" className="w-full gap-2">
-                    <Heart className="h-4 w-4" /> Wishlist
-                  </Button>
-                </Link>
+              
+              {/* Mobile Action Buttons Reorganized for better spacing */}
+              <div className="mt-2 flex flex-col gap-2">
+                <div className="flex gap-2">
+                  <Link to="/wishlist" className="flex-1" onClick={() => setMobileOpen(false)}>
+                    <Button variant="outline" className="w-full gap-2">
+                      <Heart className="h-4 w-4" /> Wishlist
+                    </Button>
+                  </Link>
+                  {/* Added Mobile Profile Button here (only visible if logged in) */}
+                  {user && (
+                    <Link to="/profile" className="flex-1" onClick={() => setMobileOpen(false)}>
+                      <Button variant="outline" className="w-full gap-2">
+                        <User className="h-4 w-4" /> Profile
+                      </Button>
+                    </Link>
+                  )}
+                </div>
+
+                {/* Mobile Auth Logic */}
                 {user ? (
-                  <Button variant="outline" className="flex-1 gap-2" onClick={() => { setMobileOpen(false); handleSignOut(); }}>
+                  <Button variant="outline" className="w-full gap-2" onClick={() => { setMobileOpen(false); handleSignOut(); }}>
                     <LogOut className="h-4 w-4" /> Sign Out
                   </Button>
                 ) : (
-                  <Link to="/login" className="flex-1" onClick={() => setMobileOpen(false)}>
+                  <Link to="/login" className="w-full" onClick={() => setMobileOpen(false)}>
                     <Button variant="outline" className="w-full gap-2">
                       <User className="h-4 w-4" /> Login
                     </Button>
                   </Link>
                 )}
               </div>
+
               <Link to="/sell" className="mt-1" onClick={() => setMobileOpen(false)}>
                 <Button className="w-full gap-2 bg-hero-gradient font-display text-sm font-semibold text-primary-foreground">
                   <Plus className="h-4 w-4" /> List Item

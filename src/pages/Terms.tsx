@@ -8,7 +8,7 @@ const Terms = () => (
       </section>
       <section>
         <h2 className="mb-2 font-display text-lg font-semibold text-foreground">2. User Eligibility</h2>
-        <p>You must be a currently enrolled college student with a valid college email address to use this platform. You must be at least 18 years old or have parental/guardian consent.</p>
+        <p>You must be a currently enrolled college student with a valid email address to use this platform. You must be at least 18 years old or have parental/guardian consent.</p>
       </section>
       <section>
         <h2 className="mb-2 font-display text-lg font-semibold text-foreground">3. Listings & Transactions</h2>
